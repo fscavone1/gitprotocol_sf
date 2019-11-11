@@ -1,9 +1,19 @@
 package it.unisa.git.impl;
 
+import it.unisa.git.entity.Repository;
+
 import java.io.File;
 import java.util.List;
 
 public class GitProtocolImpl implements GitProtocol {
+
+    private Repository repository;
+
+    public GitProtocolImpl(int _id, String _master_peer) throws Exception
+    {
+
+    }
+
     /**
      * Creates new repository in a directory
      * @param _repo_name a String, the name of the repository.
@@ -11,6 +21,15 @@ public class GitProtocolImpl implements GitProtocol {
      * @return true if it is correctly created, false otherwise.
      */
     public boolean createRepository(String _repo_name, File _directory){
+        if(repository != null){
+            return false;                           //already exists
+        }
+        try {
+            repository = new Repository(_directory.getPath(), _repo_name);
+            return true;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return false;
     }
     /**
@@ -19,7 +38,15 @@ public class GitProtocolImpl implements GitProtocol {
      * @param files a list of Files to be added to the repository.
      * @return true if it is correctly added, false otherwise.
      */
-    public boolean addFilesToRepository(String _repo_name, List<File> files){
+    public boolean addFilesToRepository(String _repo_name, List<File> files) {
+        if (repository.getName().equals(_repo_name)) {
+            try {
+                repository.addFiles(files);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return false;
     }
     /**
@@ -29,6 +56,9 @@ public class GitProtocolImpl implements GitProtocol {
      * @return true if it is correctly committed, false otherwise.
      */
     public boolean commit(String _repo_name, String _message){
+        if(repository.getName().equals(_repo_name)){
+            return repository.addCommit(_message, _repo_name);
+        }
         return false;
     }
     /**
