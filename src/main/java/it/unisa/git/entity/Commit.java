@@ -2,6 +2,7 @@ package it.unisa.git.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 public class Commit implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -34,5 +35,20 @@ public class Commit implements Serializable {
                 ", repository='" + repository + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Commit)) return false;
+        Commit commit = (Commit) o;
+        return Objects.equals(text, commit.text) &&
+                Objects.equals(repository, commit.repository) &&
+                Objects.equals(timestamp, commit.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(text, repository, timestamp);
     }
 }

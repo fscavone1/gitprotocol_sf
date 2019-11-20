@@ -1,15 +1,14 @@
 package it.unisa.git.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import org.apache.commons.io.FileUtils;
+
+import java.io.*;
+import java.util.*;
 
 public class TestGitProtocolImpl {
 
+    private static final int FILES = 5;
+    private static final String REPO_NAME = "repo_test";
     private static final String PATH = "resources/files/";
     private static final String REPOSITORY_TEST = "repo_test";
     private static final String COMMIT_TEST = "Some text for commit";
@@ -19,51 +18,82 @@ public class TestGitProtocolImpl {
 
     public static void main(String[] args) throws Exception {
 
-        GitProtocolImpl test = new GitProtocolImpl(0, "127.0.0.1");
+        File dir_1 = new File(PATH+"peer_1");
 
-        File dir = new File(PATH);
-        boolean testRep = test.createRepository(REPOSITORY_TEST, dir);
+        if(dir_1.exists()){
+            FileUtils.deleteDirectory(dir_1);
+        }
 
-        System.out.println("TEST CREATE 1: " + testRep);
+        dir_1.mkdirs();
 
-       if(testRep)
-            dir.mkdirs();
+        File dir_2 = new File(PATH+"peer_2");
 
-        List<File> files = new ArrayList<File>();
-        for(int i = 1; i<5; i++){
+        if(dir_2.exists()) {
+            FileUtils.deleteDirectory(dir_2);
+        }
+
+        dir_2.mkdirs();
+
+        try{
+            GitProtocolImpl peer_1 = new GitProtocolImpl(0, "127.0.0.1");
+            GitProtocolImpl peer_2 = new GitProtocolImpl(1, "127.0.0.1");
+
+            System.out.println("PEER1 CREATE REPO");
+            peer_1.createRepository(REPO_NAME, dir_1);
+
+            System.out.println("\nPEER1 ADD FILE");
+            peer_1.addFilesToRepository(REPO_NAME, generateFiles(1, dir_1));
+
+            System.out.println("\nPEER1 COMMIT");
+            peer_1.commit(REPO_NAME, COMMIT_TEST);
+
+            System.out.println("\nPEER1 PUSH");
+            peer_1.push(REPO_NAME);
+
+            System.out.println("\nPEER2 CREATE REPO");
+            peer_2.createRepository(REPO_NAME, dir_2);
+
+            System.out.println("\nPEER2 PULL");
+            peer_2.pull(REPO_NAME);
+
+            System.out.println("\nPEER2 ADD FILE");
+            peer_2.addFilesToRepository(REPO_NAME, generateFiles(2, dir_2));
+
+            System.out.println("\nPEER2 COMMIT");
+            peer_2.commit(REPO_NAME, COMMIT_TEST);
+
+            System.out.println("\nPEER2 PUSH");
+            peer_2.push(REPO_NAME);
+
+            System.out.println("\nPEER1 PULL");
+            peer_1.pull(REPO_NAME);
+
+            peer_1.leaveNetwork();
+            peer_2.leaveNetwork();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return;
+
+    }
+
+    public static List<File> generateFiles(int num_files, File dir) throws FileNotFoundException {
+        List<File> generated_files = new ArrayList<File>();
+        String[] texts = {TEXT_1, TEXT_2, TEXT_3};
+
+        for(int i = 1; i<num_files+1; i++){
             File f = new File(dir,i+".txt");
             FileOutputStream stream = new FileOutputStream(f);
             PrintStream printStream = new PrintStream(stream);
 
-            printStream.println(TEXT_1);
-            //printStream.println(TEXT_2);
-            //printStream.println(TEXT_3);
+            Random r = new Random();
+            String text = texts[r.nextInt(texts.length)];
+            printStream.println(text);
 
-            files.add(f);
+            generated_files.add(f);
         }
-
-        //Thread.sleep(5000);
-
-        boolean testAdd = test.addFilesToRepository(REPOSITORY_TEST, files);
-
-        System.out.println("TEST ADD 1: " + testAdd);
-
-        File f = new File(dir, "1.txt");
-
-        FileOutputStream stream = new FileOutputStream(f);
-        PrintStream printStream = new PrintStream(stream);
-
-        printStream.println(TEXT_2);
-
-        List<File> files1 = new ArrayList<>();
-        files1.add(f);
-
-        //Thread.sleep(5000);
-
-        test.addFilesToRepository(REPOSITORY_TEST, files1);
-
-        test.commit(REPOSITORY_TEST, COMMIT_TEST);
-
-
+        return generated_files;
     }
 }
