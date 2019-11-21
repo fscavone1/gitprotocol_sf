@@ -2,15 +2,14 @@ package it.unisa.git.entity;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.sql.Array;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.*;
 
 public class Repository implements Serializable {
+
     private static final long serialVersionUID = 1L;
+    private static final String ENCODING = "UTF-8";
 
     private final String name;
     private File localDirectory;
@@ -51,13 +50,11 @@ public class Repository implements Serializable {
 
         for (File f : files) {
             for(File f2 : this.files){
-                if(f.getName().equals(f2.getName()) && !FileUtils.contentEquals(f, f2)){
+                if(f.getName().equals(f2.getName())) {
                     fileMap.remove(f2);
                     fileMap.put(f, new Timestamp(System.currentTimeMillis()));
-                    FileUtils.writeLines(f, FileUtils.readLines(f2, "UTF-8"), true);
-                    System.out.println(FileUtils.readLines(f, "UTF-8").toString());
                     remove.add(f2);
-                    break;
+                    compareFiles(f, f2);
                 }
             }
         }
@@ -80,7 +77,7 @@ public class Repository implements Serializable {
 
     public List<File> getExistingFiles(){
         List<File> existingFiles = new ArrayList<>();
-        if(localDirectory.length() > 1){
+        if(localDirectory.length() > 1) {
             for (File f : localDirectory.listFiles()) {
                 existingFiles.add(f);
             }
@@ -88,6 +85,36 @@ public class Repository implements Serializable {
 
         //System.out.println("I file esistenti sono: " + existingFiles.toString());
         return existingFiles;
+    }
+
+    public void compareFiles(File f, File f2){
+        try {
+            if (!FileUtils.contentEquals(f, f2)) {
+                List<String> read_f = FileUtils.readLines(f, ENCODING);
+                List<String> read_f2 = FileUtils.readLines(f2, ENCODING);
+                List<String> remove_f2 = new ArrayList<>();
+
+                for (String s : read_f) {
+                    for (String s2 : read_f2) {
+                        if (s.equals(s2)) {
+                            remove_f2.add(s2);
+                            break;
+                        }
+                    }
+                }
+
+                read_f2.removeAll(remove_f2);
+
+                if (!read_f2.isEmpty()) {
+                    FileUtils.writeLines(f, Collections.singleton("\n---------------- MERGED ----------------------\n"), true);
+                    FileUtils.writeLines(f, read_f2, true);
+                }
+
+                System.out.println(FileUtils.readLines(f, ENCODING).toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean addCommit(String text, String repository){

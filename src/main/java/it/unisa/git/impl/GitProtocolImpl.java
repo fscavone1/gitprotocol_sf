@@ -98,17 +98,15 @@ public class GitProtocolImpl implements GitProtocol {
             if(dht_repo == null || repository.getCommits().size() - dht_repo.getCommits().size() == 1) {
                 saveOnDHT(_repo_name, repository);
                 System.out.println(repository.toString());
-                return "SUCCESS!";
+                return ErrorMessage.PUSH_SUCCESS.print();
             }
             else{
-                return "RIP";
+                return ErrorMessage.PUSH_CONFLICT.print();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return "FAILURE";
+        return ErrorMessage.ERROR_MESSAGE.print();
     }
     /**
      * Pull the files from the Network. If there is a conflict, the system duplicates
@@ -122,7 +120,7 @@ public class GitProtocolImpl implements GitProtocol {
 
             if(dht_repo.hashCode() == repository.hashCode()){
                 System.out.println(dht_repo.toString());
-                return "Already up-to-date!";
+                return ErrorMessage.PULL_NO_UPDATE.print();
             }
             else {
                 HashMap<File, Timestamp> dht_map = dht_repo.getFileMap();
@@ -149,14 +147,12 @@ public class GitProtocolImpl implements GitProtocol {
 
                 System.out.println(repository.toString());
 
-                return "SUCCESS!";
+                return ErrorMessage.PULL_SUCCESS.print();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return "RIP";
+        return ErrorMessage.ERROR_MESSAGE.print();
     }
 
     public boolean leaveNetwork() {
@@ -170,7 +166,7 @@ public class GitProtocolImpl implements GitProtocol {
         if(fg.isSuccess()){
             Collection<Data> repositories = fg.dataMap().values();
             if(repositories.isEmpty()){
-                return null;
+                return new Repository(new File(""), "");
             }
             return (Repository) fg.dataMap().values().iterator().next().object();
         }
