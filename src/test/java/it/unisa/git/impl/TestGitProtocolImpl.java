@@ -42,31 +42,49 @@ public class TestGitProtocolImpl {
             peer_1.createRepository(REPO_NAME, dir_1);
 
             System.out.println("\nPEER1 ADD FILE");
-            peer_1.addFilesToRepository(REPO_NAME, generateFiles(1, dir_1));
+            List<File> files = new ArrayList<>();
+            files.add(generateFile(TEXT_1, "file_1", dir_1));
+            files.add(generateFile(TEXT_2, "file_2", dir_1));
+
+            peer_1.addFilesToRepository(REPO_NAME, files);
 
             System.out.println("\nPEER1 COMMIT");
             peer_1.commit(REPO_NAME, COMMIT_TEST);
 
-            System.out.println("\nPEER1 PUSH");
-            peer_1.push(REPO_NAME);
+            //System.out.println("\nPEER1 PUSH");
+            //peer_1.push(REPO_NAME);
 
             System.out.println("\nPEER2 CREATE REPO");
             peer_2.createRepository(REPO_NAME, dir_2);
 
-            System.out.println("\nPEER2 PULL");
-            peer_2.pull(REPO_NAME);
+            //System.out.println("\nPEER2 PULL");
+           // System.out.println(peer_2.pull(REPO_NAME));
 
             System.out.println("\nPEER2 ADD FILE");
-            peer_2.addFilesToRepository(REPO_NAME, generateFiles(2, dir_2));
+
+            files.clear();
+            files.add(generateFile(TEXT_3, "file_2", dir_2));
+            files.add(generateFile(TEXT_2, "file_3", dir_2));
+
+            peer_2.addFilesToRepository(REPO_NAME, files);
 
             System.out.println("\nPEER2 COMMIT");
-            peer_2.commit(REPO_NAME, COMMIT_TEST);
+            System.out.println(peer_2.commit(REPO_NAME, COMMIT_TEST));
 
             System.out.println("\nPEER2 PUSH");
-            peer_2.push(REPO_NAME);
+            System.out.println(peer_2.push(REPO_NAME));
 
             System.out.println("\nPEER1 PULL");
-            peer_1.pull(REPO_NAME);
+            System.out.println(peer_1.pull(REPO_NAME));
+
+            System.out.println("\nPEER1 PULL");
+            System.out.println(peer_1.pull(REPO_NAME));
+
+            System.out.println("\nPEER1 PUSH");
+            peer_1.push(REPO_NAME);
+
+            System.out.println("\nPEER2 PULL");
+            System.out.println(peer_2.pull(REPO_NAME));
 
             peer_1.leaveNetwork();
             peer_2.leaveNetwork();
@@ -79,21 +97,12 @@ public class TestGitProtocolImpl {
 
     }
 
-    public static List<File> generateFiles(int num_files, File dir) throws FileNotFoundException {
-        List<File> generated_files = new ArrayList<File>();
-        String[] texts = {TEXT_1, TEXT_2, TEXT_3};
+    public static File generateFile(String text, String name, File dir) throws IOException {
 
-        for(int i = 1; i<num_files+1; i++){
-            File f = new File(dir,i+".txt");
-            FileOutputStream stream = new FileOutputStream(f);
-            PrintStream printStream = new PrintStream(stream);
+        File f = new File(dir,name+".txt");
+        FileUtils.writeLines(f, Collections.singleton(text));
 
-            Random r = new Random();
-            String text = texts[r.nextInt(texts.length)];
-            printStream.println(text);
+        return f;
 
-            generated_files.add(f);
-        }
-        return generated_files;
     }
 }

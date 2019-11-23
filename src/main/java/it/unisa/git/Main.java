@@ -1,6 +1,8 @@
 package it.unisa.git;
 
+import it.unisa.git.impl.ErrorMessage;
 import it.unisa.git.impl.GitProtocolImpl;
+import org.apache.commons.io.FileUtils;
 import org.beryx.textio.TextIO;
 import org.beryx.textio.TextIoFactory;
 import org.beryx.textio.TextTerminal;
@@ -8,11 +10,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -27,8 +27,12 @@ public class Main {
     private static final String TEXT_2 = "Praesent egestas dolor sapien, sed sagittis nisl condimentum non.";
     private static final String TEXT_3 = "Quisque rutrum quam in enim pulvinar, ut fermentum ante commodo.";
     private static File dir;
+    private static final String PATH = "resources/files/";
 
     public static void main(String[] args) {
+        boolean filesAdded = true;
+        boolean commitAdded = true;
+
         Main exe = new Main();
         final CmdLineParser parser = new CmdLineParser(exe);
         try{
@@ -47,8 +51,7 @@ public class Main {
                     case 1:
                         terminal.printf("Enter the repository name & the folder path!\n\n");
                         String repository_1 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Name:");
-                        String path = txtIO.newStringInputReader().withDefaultValue("resources/files/").read("Path:");
-                        dir = new File(path);
+                        dir = new File(PATH, id+"");
                         if(peer.createRepository(repository_1, dir)){
                             dir.mkdirs();
                             terminal.printf("\nRepository %s successfully created in the path '%s'!\n",repository_1,dir.getPath());
@@ -60,36 +63,53 @@ public class Main {
                         terminal.printf("Choose the file to add to the repository!\n\n");
                         String repository_2 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Name:");
                         int num_files = txtIO.newIntInputReader().withDefaultValue(1).read("Number of files:");
-                        List<File> files = generateFiles(num_files, dir);
-                        if(peer.addFilesToRepository(repository_2, files))
-                            terminal.printf("\nFiles successfully added in the '%s' repository!\n",repository_2);
+
+                        List<File> files = new ArrayList<>();
+                        for(int i = 0; i<num_files ; i++){
+                            String name = txtIO.newStringInputReader().withDefaultValue(i+"").read("Name:");
+                            String text = txtIO.newStringInputReader().withDefaultValue(TEXT_1).read("Text:");
+                            files.add(generateFile(name, text, dir));
+                        }
+
+                        if(peer.addFilesToRepository(repository_2, files)) {
+                            filesAdded = true;
+                            terminal.printf("\nFiles successfully added in the '%s' repository!\n", repository_2);
+                        }
                         else
                             terminal.printf("\nError in adding the files to the repository or already exists.");
                         break;
                     case 3:
-                        terminal.printf("Entry the commit!\n\n");
-                        String repository_3 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Repository name:");
-                        String commit = txtIO.newStringInputReader().withDefaultValue("default-commit").read("Text:");
-                        if(peer.commit(repository_3, commit))
-                            terminal.printf("\nCommit successfully added in the '%s' repository!\n",repository_3);
-                        else
-                            terminal.printf("\nError in adding the commit to the repository or already exists.");
+                        if(filesAdded) {
+                            terminal.printf("Entry the commit!\n\n");
+                            String repository_3 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Repository name:");
+                            String commit = txtIO.newStringInputReader().withDefaultValue("default-commit").read("Text:");
+                            if (peer.commit(repository_3, commit)) {
+                                commitAdded = true;
+                                terminal.printf("\nCommit successfully added in the '%s' repository!\n", repository_3);
+                            }
+                            else
+                                terminal.printf("\nError in adding the commit to the repository or already exists.");
+                        }
+                        else{
+                            terminal.printf("You need to add some files before creating a commit!\n\n");
+                        }
                         break;
                     case 4:
-                        terminal.printf("Push the changes to the repository!\n\n");
-                        String repository_4 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Repository name:");
-                        if(peer.push(repository_4).equals("SUCCESS!"))
-                            terminal.printf("\nSuccessfully update the repository!\n");
-                        else
-                            terminal.printf("\nError!");
+                        if(filesAdded && commitAdded) {
+                            terminal.printf("Push the changes to the repository!\n\n");
+                            String repository_4 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Repository name:");
+                            terminal.printf(peer.push(repository_4));
+                            filesAdded = false;
+                            commitAdded = false;
+                        }
+                        else{
+                            terminal.printf("You need to add some files AND a commit before pushing something!\n\n");
+                        }
                         break;
                     case 5:
                         terminal.printf("Pull the changes to the repository!\n\n");
                         String repository_5 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Repository name:");
-                        if(peer.push(repository_5).equals("SUCCESS!"))
-                            terminal.printf("\nSuccessfully update the repository!\n");
-                        else
-                            terminal.printf("\nAlready-up-to-date or error.");
+                        terminal.printf(peer.pull(repository_5));
                         break;
                     case 6:
                         terminal.printf("\nARE YOU SURE TO LEAVE THE NETWORK?\n");
@@ -121,21 +141,12 @@ public class Main {
         terminal.printf("\n6 - EXIT\n");
     }
 
-    public static List<File> generateFiles(int num_files, File dir) throws FileNotFoundException {
-        List<File> generated_files = new ArrayList<File>();
-        String[] texts = {TEXT_1, TEXT_2, TEXT_3};
+    public static File generateFile(String name, String text, File dir) throws IOException {
 
-        for(int i = 1; i<num_files+1; i++){
-            File f = new File(dir,i+".txt");
-            FileOutputStream stream = new FileOutputStream(f);
-            PrintStream printStream = new PrintStream(stream);
+        File f = new File(dir,name+".txt");
+        FileUtils.writeLines(f, Collections.singleton(text));
 
-            Random r = new Random();
-            String text = texts[r.nextInt(texts.length)];
-            printStream.println(text);
+        return f;
 
-            generated_files.add(f);
-        }
-        return generated_files;
     }
 }

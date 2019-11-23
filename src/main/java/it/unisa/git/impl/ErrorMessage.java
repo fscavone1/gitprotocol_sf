@@ -3,7 +3,7 @@ package it.unisa.git.impl;
 public enum ErrorMessage {
 
     ERROR_MESSAGE("Something went wrong!"),
-    REPOSITORY_NOT_FOUND ("Repository not found!"),
+    REPOSITORY_NOT_FOUND ("Repository not found! You need to create it before requesting a pull."),
     PULL_SUCCESS("Successfully pulled changes into the repository!"),
     PULL_NO_UPDATE("Already up-to-date!"),
     PUSH_CONFLICT("Someone else changed something into the repository, " +

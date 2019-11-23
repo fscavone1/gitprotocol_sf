@@ -9,24 +9,29 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class GitProtocolImpl implements GitProtocol {
 
     private Repository repository;
+    private int commit_pending = 0;
     final private Peer peer;
     final private PeerDHT _dht;
     final private int DEFAULT_MASTER_PORT = 4000;
 
     public GitProtocolImpl(int _id, String _master_peer) throws Exception {
-        repository = new Repository(new File(""),"");
+        repository = null;
         peer = new PeerBuilder(Number160.createHash(_id)).ports(DEFAULT_MASTER_PORT+_id).start();
         _dht = new PeerBuilderDHT(peer).start();
 
@@ -49,7 +54,7 @@ public class GitProtocolImpl implements GitProtocol {
     public boolean createRepository(String _repo_name, File _directory){
         try {
             repository = new Repository(_directory, _repo_name);
-            System.out.println(repository.toString());
+            //System.out.println(repository.toString());
             return true;
         } catch (Exception e){
             e.printStackTrace();
@@ -82,6 +87,7 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public boolean commit(String _repo_name, String _message){
         if(repository.getName().equals(_repo_name)){
+            commit_pending += 1;
             return repository.addCommit(_message, _repo_name);
         }
         return false;
@@ -97,7 +103,8 @@ public class GitProtocolImpl implements GitProtocol {
             Repository dht_repo = getFromDHT(_repo_name);
             if(dht_repo == null || repository.getCommits().size() - dht_repo.getCommits().size() == 1) {
                 saveOnDHT(_repo_name, repository);
-                System.out.println(repository.toString());
+                commit_pending = 0;
+                System.out.println("PUSH:" + repository.toString());
                 return ErrorMessage.PUSH_SUCCESS.print();
             }
             else{
@@ -116,39 +123,37 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public String pull(String _repo_name){
         try{
-            Repository dht_repo = getFromDHT(_repo_name);
+            if(repository == null){
+                return ErrorMessage.REPOSITORY_NOT_FOUND.print();
+            }
 
-            if(dht_repo.hashCode() == repository.hashCode()){
-                System.out.println(dht_repo.toString());
+            boolean append = false;
+            Repository dht_repo = getFromDHT(_repo_name);
+            int commit_diff = repository.getCommits().size() - dht_repo.getCommits().size();
+
+            HashMap<File, List<String>> dht_map = dht_repo.getFileMap();
+
+            System.out.println("COMMIT: "+commit_diff);
+
+            if(commit_diff == commit_pending){
                 return ErrorMessage.PULL_NO_UPDATE.print();
             }
-            else {
-                HashMap<File, Timestamp> dht_map = dht_repo.getFileMap();
-                HashMap<File, Timestamp> repo_map = repository.getFileMap();
 
-                HashMap<File, Timestamp> remove = new HashMap<>();
-
-                for (File f : repo_map.keySet()) {
-                    for (File f2 : dht_map.keySet()) {
-                        if (f.getName().equals(f2.getName()) && repo_map.get(f).after(dht_map.get(f2))) {
-                            remove.put(f2, dht_map.get(f2));
-                            dht_repo.getFiles().remove(f2);
-                        }
-                    }
-                }
-
-                dht_map.keySet().removeAll(remove.keySet());
-                repo_map.putAll(dht_map);
-
-                List<File> dht_files = new ArrayList<>(dht_repo.getFiles());
-
-                repository.addFiles(dht_files);
-                repository.addCommit(dht_repo.getCommits());
-
-                System.out.println(repository.toString());
-
-                return ErrorMessage.PULL_SUCCESS.print();
+            if(commit_diff < commit_pending){
+                append = true;
             }
+
+            if(commit_diff < 0){
+                append = false;
+            }
+
+            repository.addFiles(dht_map, append);
+            repository.addCommit(dht_repo.getCommits());
+
+            System.out.println("PULL: " + repository.toString());
+
+            return ErrorMessage.PULL_SUCCESS.print();
+
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -166,7 +171,7 @@ public class GitProtocolImpl implements GitProtocol {
         if(fg.isSuccess()){
             Collection<Data> repositories = fg.dataMap().values();
             if(repositories.isEmpty()){
-                return new Repository(new File(""), "");
+                return null;
             }
             return (Repository) fg.dataMap().values().iterator().next().object();
         }

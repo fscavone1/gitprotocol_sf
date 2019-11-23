@@ -2,4 +2,4 @@ Praesent egestas dolor sapien, sed sagittis nisl condimentum non.
 
 ---------------- MERGED ----------------------
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Quisque rutrum quam in enim pulvinar, ut fermentum ante commodo.
