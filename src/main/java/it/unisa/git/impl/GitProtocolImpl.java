@@ -5,22 +5,17 @@ import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 
 public class GitProtocolImpl implements GitProtocol {
 
@@ -29,8 +24,10 @@ public class GitProtocolImpl implements GitProtocol {
     final private Peer peer;
     final private PeerDHT _dht;
     final private int DEFAULT_MASTER_PORT = 4000;
+    final private int ID;
 
-    public GitProtocolImpl(int _id, String _master_peer) throws Exception {
+    public GitProtocolImpl(int _id, String _master_peer, final MessageListener _listener) throws Exception {
+        this.ID = _id;
         repository = null;
         peer = new PeerBuilder(Number160.createHash(_id)).ports(DEFAULT_MASTER_PORT+_id).start();
         _dht = new PeerBuilderDHT(peer).start();
@@ -43,6 +40,13 @@ public class GitProtocolImpl implements GitProtocol {
         } else {
             throw new Exception("Error in master peer bootstrap.");
         }
+
+        peer.objectDataReply(new ObjectDataReply() {
+
+            public Object reply(PeerAddress sender, Object request) throws Exception {
+                return _listener.parseMessage(request);
+            }
+        });
     }
 
     /**
@@ -54,6 +58,7 @@ public class GitProtocolImpl implements GitProtocol {
     public boolean createRepository(String _repo_name, File _directory){
         try {
             repository = new Repository(_directory, _repo_name);
+            repository.setContributors(_dht.peer().peerAddress());
             //System.out.println(repository.toString());
             return true;
         } catch (Exception e){
@@ -149,6 +154,7 @@ public class GitProtocolImpl implements GitProtocol {
 
             repository.addFiles(dht_map, append);
             repository.addCommit(dht_repo.getCommits());
+            repository.setContributors(dht_repo.getContributors());
 
             System.out.println("PULL: " + repository.toString());
 
@@ -181,6 +187,14 @@ public class GitProtocolImpl implements GitProtocol {
     private boolean saveOnDHT(String _repo_name, Repository _dir){
         try {
             _dht.put(Number160.createHash(_repo_name)).data(new Data(_dir)).start().awaitUninterruptibly();
+            for(PeerAddress peer:_dir.getContributors())
+            {
+                if(!peer.equals(_dht.peer().peerAddress())) {
+                    FutureDirect futureDirect = _dht.peer().sendDirect(peer).object("Peer " +
+                            ID + " pushed some changes into the repository! ").start();
+                    futureDirect.awaitUninterruptibly();
+                }
+            }
             return true;
         } catch (IOException e) {
             e.printStackTrace();

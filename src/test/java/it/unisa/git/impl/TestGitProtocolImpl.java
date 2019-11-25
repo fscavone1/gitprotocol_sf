@@ -35,8 +35,8 @@ public class TestGitProtocolImpl {
         dir_2.mkdirs();
 
         try{
-            GitProtocolImpl peer_1 = new GitProtocolImpl(0, "127.0.0.1");
-            GitProtocolImpl peer_2 = new GitProtocolImpl(1, "127.0.0.1");
+            GitProtocolImpl peer_1 = new GitProtocolImpl(0, "127.0.0.1", new MessageListenerImpl(0));
+            GitProtocolImpl peer_2 = new GitProtocolImpl(1, "127.0.0.1", new MessageListenerImpl(1));
 
             System.out.println("PEER1 CREATE REPO");
             peer_1.createRepository(REPO_NAME, dir_1);

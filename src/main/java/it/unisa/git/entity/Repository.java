@@ -1,5 +1,6 @@
 package it.unisa.git.entity;
 
+import net.tomp2p.peers.PeerAddress;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -16,6 +17,7 @@ public class Repository implements Serializable {
     private final List<File> files;
     private List<Commit> commits;
     private final HashMap<File, List<String>> fileMap;
+    HashSet<PeerAddress> contributors;
 
     public Repository(File localDirectory, String name) throws IOException {
         this.localDirectory = localDirectory;
@@ -26,6 +28,7 @@ public class Repository implements Serializable {
         for (File f : this.files) {
             this.fileMap.put(f, FileUtils.readLines(f, ENCODING));
         }
+        this.contributors = new HashSet<>();
     }
 
     public String getName() {
@@ -42,6 +45,18 @@ public class Repository implements Serializable {
 
     public HashMap<File, List<String>> getFileMap() {
         return fileMap;
+    }
+
+    public void setContributors(PeerAddress c){
+        contributors.add(c);
+    }
+
+    public void setContributors(HashSet<PeerAddress> c){
+        contributors.addAll(c);
+    }
+
+    public HashSet<PeerAddress> getContributors(){
+        return contributors;
     }
 
     public void addFiles(List<File> files) throws IOException {
@@ -171,14 +186,8 @@ public class Repository implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Repository{" +
-                "name='" + name + '\'' +
-                ", localDirectory='" + localDirectory + '\'' +
-                ", files=" + files +
-                ", commits=" + commits +
-                ", fileMap=" + fileMap +
-                '}';
+    public int hashCode() {
+        return Objects.hash(name, commits, fileMap);
     }
 
     @Override
@@ -190,11 +199,19 @@ public class Repository implements Serializable {
                 Objects.equals(localDirectory, that.localDirectory) &&
                 Objects.equals(files, that.files) &&
                 Objects.equals(commits, that.commits) &&
-                Objects.equals(fileMap, that.fileMap);
+                Objects.equals(fileMap, that.fileMap) &&
+                Objects.equals(contributors, that.contributors);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(name, commits, fileMap);
+    public String toString() {
+        return "Repository{" +
+                "name='" + name + '\'' +
+                ", localDirectory=" + localDirectory +
+                ", files=" + files +
+                ", commits=" + commits +
+                ", fileMap=" + fileMap +
+                ", contributors=" + contributors +
+                '}';
     }
 }

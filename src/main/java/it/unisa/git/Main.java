@@ -2,6 +2,8 @@ package it.unisa.git;
 
 import it.unisa.git.impl.ErrorMessage;
 import it.unisa.git.impl.GitProtocolImpl;
+import it.unisa.git.impl.MessageListener;
+import it.unisa.git.impl.MessageListenerImpl;
 import org.apache.commons.io.FileUtils;
 import org.beryx.textio.TextIO;
 import org.beryx.textio.TextIoFactory;
@@ -39,7 +41,7 @@ public class Main {
             parser.parseArgument(args);
             TextIO txtIO = TextIoFactory.getTextIO();
             TextTerminal terminal = txtIO.getTextTerminal();
-            GitProtocolImpl peer = new GitProtocolImpl(id, master);
+            GitProtocolImpl peer = new GitProtocolImpl(id, master, new MessageListenerImpl(id));
 
             terminal.printf("\nID %d MASTER %s\n", id, master);
 
@@ -66,7 +68,7 @@ public class Main {
 
                         List<File> files = new ArrayList<>();
                         for(int i = 0; i<num_files ; i++){
-                            String name = txtIO.newStringInputReader().withDefaultValue(i+"").read("Name:");
+                            String name = txtIO.newStringInputReader().withDefaultValue(""+(i+1)).read("Name:");
                             String text = txtIO.newStringInputReader().withDefaultValue(TEXT_1).read("Text:");
                             files.add(generateFile(name, text, dir));
                         }
@@ -119,7 +121,6 @@ public class Main {
                             System.exit(0);
                         }
                         break;
-
                     default:
                         break;
                 }
