@@ -2,8 +2,11 @@ package it.unisa.git.impl;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TestGitProtocolImpl {
 
@@ -18,23 +21,23 @@ public class TestGitProtocolImpl {
 
     public static void main(String[] args) throws Exception {
 
-        File dir_1 = new File(PATH+"peer_1");
+        File dir_1 = new File(PATH + "peer_1");
 
-        if(dir_1.exists()){
+        if (dir_1.exists()) {
             FileUtils.deleteDirectory(dir_1);
         }
 
         dir_1.mkdirs();
 
-        File dir_2 = new File(PATH+"peer_2");
+        File dir_2 = new File(PATH + "peer_2");
 
-        if(dir_2.exists()) {
+        if (dir_2.exists()) {
             FileUtils.deleteDirectory(dir_2);
         }
 
         dir_2.mkdirs();
 
-        try{
+        try {
             GitProtocolImpl peer_1 = new GitProtocolImpl(0, "127.0.0.1", new MessageListenerImpl(0));
             GitProtocolImpl peer_2 = new GitProtocolImpl(1, "127.0.0.1", new MessageListenerImpl(1));
 
@@ -58,7 +61,7 @@ public class TestGitProtocolImpl {
             peer_2.createRepository(REPO_NAME, dir_2);
 
             //System.out.println("\nPEER2 PULL");
-           // System.out.println(peer_2.pull(REPO_NAME));
+            // System.out.println(peer_2.pull(REPO_NAME));
 
             System.out.println("\nPEER2 ADD FILE");
 
@@ -89,7 +92,7 @@ public class TestGitProtocolImpl {
             peer_1.leaveNetwork();
             peer_2.leaveNetwork();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -99,7 +102,7 @@ public class TestGitProtocolImpl {
 
     public static File generateFile(String text, String name, File dir) throws IOException {
 
-        File f = new File(dir,name+".txt");
+        File f = new File(dir, name + ".txt");
         FileUtils.writeLines(f, Collections.singleton(text));
 
         return f;

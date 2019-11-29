@@ -2,6 +2,8 @@ package it.unisa.git.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Commit implements Serializable {
@@ -9,10 +11,14 @@ public class Commit implements Serializable {
     private final String text;
     private final String repository;
     private final Timestamp timestamp;
+    private final List<String> modifiedFiles;
+    private final String author;
 
-    public Commit(String text, String repository) {
+    public Commit(String text, String repository, List<String> modifiedFiles, String author) {
         this.text = text;
         this.repository = repository;
+        this.modifiedFiles = new ArrayList<>(modifiedFiles);
+        this.author = "PEER " + author;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -26,6 +32,14 @@ public class Commit implements Serializable {
 
     public Timestamp getTimestamp() {
         return timestamp;
+    }
+
+    public List<String> getModifiedFiles() {
+        return modifiedFiles;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     @Override
