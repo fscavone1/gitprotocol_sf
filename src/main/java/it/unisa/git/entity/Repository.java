@@ -1,15 +1,14 @@
 package it.unisa.git.entity;
 
-import net.tomp2p.peers.PeerAddress;
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
-public class Repository implements Serializable {
+import net.tomp2p.peers.PeerAddress;
+import org.apache.commons.io.FileUtils;
 
+public class Repository implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String ENCODING = "UTF-8";
     private static final String MERGED = "\n---------------- MERGED ----------------------\n";
@@ -58,6 +57,10 @@ public class Repository implements Serializable {
 
     public void setContributors(HashSet<PeerAddress> c) {
         contributors.addAll(c);
+    }
+
+    public void removeContributor(PeerAddress c) {
+        contributors.remove(c);
     }
 
     public void addFiles(List<File> files) throws IOException {
@@ -158,22 +161,19 @@ public class Repository implements Serializable {
         }
     }
 
-    public boolean addCommit(String text, String repository, int peer) {
+    public void addCommit(String text, String repository, int peer) {
         Commit commit = new Commit(text, repository, modifiedFiles, peer+"");
         if (!commits.contains(commit)) {
             commits.add(commit);
-            return true;
         }
-        return false;
     }
 
-    public boolean addCommit(List<Commit> commits) {
+    public void addCommit(List<Commit> commits) {
         for (Commit c : commits) {
             if (!this.commits.contains(c)) {
                 this.commits.add(c);
             }
         }
-        return true;
     }
 
     @Override

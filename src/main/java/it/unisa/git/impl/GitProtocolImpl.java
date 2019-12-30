@@ -61,9 +61,11 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public boolean createRepository(String _repo_name, File _directory) {
         try {
-            repository = new Repository(_directory, _repo_name);
-            repository.setContributors(_dht.peer().peerAddress());
-            return true;
+            if(repository == null){
+                repository = new Repository(_directory, _repo_name);
+                repository.setContributors(_dht.peer().peerAddress());
+                return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -99,7 +101,8 @@ public class GitProtocolImpl implements GitProtocol {
     public boolean commit(String _repo_name, String _message) {
         if (repository.getName().equals(_repo_name)) {
             commit_pending += 1;
-            return repository.addCommit(_message, _repo_name, ID);
+            repository.addCommit(_message, _repo_name, ID);
+            return true;
         }
         return false;
     }
@@ -174,9 +177,10 @@ public class GitProtocolImpl implements GitProtocol {
         return repository;
     }
 
-    public boolean leaveNetwork() {
+    public void leaveNetwork() {
         _dht.peer().announceShutdown().start().awaitUninterruptibly();
-        return true;
+        if(repository != null)
+            repository.removeContributor(_dht.peer().peerAddress());
     }
 
     private Repository getFromDHT(String _repo_name) throws IOException, ClassNotFoundException {
