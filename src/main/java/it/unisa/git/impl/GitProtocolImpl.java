@@ -173,14 +173,21 @@ public class GitProtocolImpl implements GitProtocol {
         return ErrorMessage.ERROR_MESSAGE.print();
     }
 
+    /**
+     * Retrieve the repository
+     *
+     * @return an Object, represent the current repository
+     */
+
     public Repository getRepository() {
         return repository;
     }
 
+    /**
+     * A peer leave the network and remove itself from contributors
+     */
     public void leaveNetwork() {
         _dht.peer().announceShutdown().start().awaitUninterruptibly();
-        if(repository != null)
-            repository.removeContributor(_dht.peer().peerAddress());
     }
 
     private Repository getFromDHT(String _repo_name) throws IOException, ClassNotFoundException {

@@ -146,6 +146,7 @@ public class Repository implements Serializable {
                         }
                     }
                     read_f2.removeAll(remove_f2);
+                    read_f2.removeAll(Collections.singleton(MERGED));
 
                     if (!read_f2.isEmpty()) {
                         FileUtils.writeLines(f, Collections.singleton(MERGED), append);

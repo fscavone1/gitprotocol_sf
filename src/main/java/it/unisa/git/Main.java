@@ -5,6 +5,7 @@ import it.unisa.git.entity.Repository;
 import it.unisa.git.impl.ErrorMessage;
 import it.unisa.git.impl.GitProtocolImpl;
 import it.unisa.git.impl.MessageListenerImpl;
+import net.tomp2p.peers.PeerAddress;
 import org.apache.commons.io.FileUtils;
 import org.beryx.textio.TextIO;
 import org.beryx.textio.TextIoFactory;
@@ -174,5 +175,6 @@ public class Main {
                 terminal.printf("   " + s + "\n");
             }
         }
+        terminal.printf(rep.getContributors().toString());
     }
 }
