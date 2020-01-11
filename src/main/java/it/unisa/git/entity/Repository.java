@@ -63,6 +63,12 @@ public class Repository implements Serializable {
         contributors.remove(c);
     }
 
+    /**
+     * Adds the files to the repository
+     *
+     * @param files a List, the files to add to the repository.
+     */
+
     public void addFiles(List<File> files) throws IOException {
 
         modifiedFiles.clear();
@@ -90,6 +96,13 @@ public class Repository implements Serializable {
         }
 
     }
+
+    /**
+     * Adds the DHT files to the repository
+     *
+     * @param dht_map an HashMap, the DHT files to add to the repository.
+     * @param append a Boolean, if the files needs to be merged or not.
+     */
 
     public void addFiles(HashMap<File, List<String>> dht_map, boolean append) throws IOException {
 
@@ -120,6 +133,12 @@ public class Repository implements Serializable {
 
     }
 
+    /**
+     * Retrieve the files existing in the repository.
+     *
+     * @return the list of files.
+     */
+
     public List<File> getExistingFiles() {
         List<File> existingFiles = new ArrayList<>();
         if (localDirectory.length() > 1) {
@@ -130,6 +149,14 @@ public class Repository implements Serializable {
 
         return existingFiles;
     }
+
+
+    /**
+     * Merges the local file with the DHT file, which has the same name and different content.
+     *
+     * @param f a File, the local file with the same name of a file in the DHT.
+     * @param read_f2 a List of String, the content of the file in the DHT.
+     */
 
     private void compareFiles(File f, List<String> read_f2, boolean append) {
         try {
@@ -162,12 +189,26 @@ public class Repository implements Serializable {
         }
     }
 
+    /**
+     * Adds a commit to the repository.
+     *
+     * @param text a String, the text of the repository.
+     * @param repository a String, the name of the repository.
+     * @param peer an Integer, the peer ID.
+     */
+
     public void addCommit(String text, String repository, int peer) {
         Commit commit = new Commit(text, repository, modifiedFiles, peer+"");
         if (!commits.contains(commit)) {
             commits.add(commit);
         }
     }
+
+    /**
+     * Adds DHT commits to the repository.
+     *
+     * @param commits a List of Commit, the list of DHT commits to add.
+     */
 
     public void addCommit(List<Commit> commits) {
         for (Commit c : commits) {
@@ -190,6 +231,13 @@ public class Repository implements Serializable {
                 ", fileMap=" + fileMap +
                 ", contributors=" + contributors +
                 ", localDirectory=" + localDirectory +
+                ", commits=" + commits +
+                '}';
+    }
+
+    public String testToString() {
+        return "Repository{" +
+                "files=" + fileMap.keySet() +
                 ", commits=" + commits +
                 '}';
     }

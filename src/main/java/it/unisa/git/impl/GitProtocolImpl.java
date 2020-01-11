@@ -31,7 +31,6 @@ public class GitProtocolImpl implements GitProtocol {
 
     public GitProtocolImpl(int _id, String _master_peer, final MessageListener _listener) throws Exception {
         this.ID = _id;
-        repository = null;
         peer = new PeerBuilder(Number160.createHash(_id)).ports(DEFAULT_MASTER_PORT + _id).start();
         _dht = new PeerBuilderDHT(peer).start();
 
@@ -116,13 +115,18 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public String push(String _repo_name) {
         try {
-            Repository dht_repo = getFromDHT(_repo_name);
-            if (dht_repo == null || repository.getCommits().size() - dht_repo.getCommits().size() == 1) {
-                saveOnDHT(_repo_name, repository);
-                commit_pending = 0;
-                return ErrorMessage.PUSH_SUCCESS.print();
-            } else {
-                return ErrorMessage.PUSH_CONFLICT.print();
+            if (repository == null || !repository.getName().equals(_repo_name)) {
+                return ErrorMessage.REPOSITORY_NOT_FOUND.print();
+            }
+            else {
+                Repository dht_repo = getFromDHT(_repo_name);
+                if (dht_repo == null || repository.getCommits().size() - dht_repo.getCommits().size() == 1) {
+                    saveOnDHT(_repo_name, repository);
+                    commit_pending = 0;
+                    return ErrorMessage.PUSH_SUCCESS.print();
+                } else {
+                    return ErrorMessage.PUSH_CONFLICT.print();
+                }
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -139,7 +143,7 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public String pull(String _repo_name) {
         try {
-            if (repository == null) {
+            if (repository == null || !repository.getName().equals(_repo_name)) {
                 return ErrorMessage.REPOSITORY_NOT_FOUND.print();
             }
 

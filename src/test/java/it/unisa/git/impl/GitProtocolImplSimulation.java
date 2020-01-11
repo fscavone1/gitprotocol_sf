@@ -63,7 +63,7 @@ public class GitProtocolImplSimulation {
 	@Test
 	public void execution() throws IOException {
 
-		//MASTER PEER: crea la repository e effettua il push di un file
+		//STEP 1: the MASTER-PEER creates a repository and pushes a file
 
 		assertTrue(master_peer.createRepository(REPO_NAME, dirs[0]));
 
@@ -76,12 +76,13 @@ public class GitProtocolImplSimulation {
 		assertTrue(master_peer.commit(REPO_NAME, COMMIT_TEST));
 		assertEquals(ErrorMessage.PUSH_SUCCESS.print(),master_peer.push(REPO_NAME));
 
-		System.out.println("---------------------------");
+		System.out.println("---------- STEP 1 ----------");
 
 		System.out.println("REPOSITORY MASTER PEER:");
 		System.out.println(master_peer.getRepository().getFileMap().keySet());
 
-		//PEER 1: crea la repository, effettua la pull, modifica un file, ne crea uno nuovo e fa il push dei due file
+		//STEP 2: the PEER-1 creates a repository, pulls from the network, modifies a file, adds a new one and then
+		//pushes the changes into the network
 
 		assertTrue(peer_1.createRepository(REPO_NAME, dirs[1]));
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_1.pull(REPO_NAME));
@@ -98,15 +99,15 @@ public class GitProtocolImplSimulation {
 		assertTrue(peer_1.commit(REPO_NAME, COMMIT_TEST));
 		assertEquals(ErrorMessage.PUSH_SUCCESS.print(), peer_1.push(REPO_NAME));
 
-		System.out.println("---------------------------");
+		System.out.println("---------- STEP 2 ----------");
 
 		System.out.println("REPOSITORY MASTER PEER:");
 		System.out.println(master_peer.getRepository().getFileMap().keySet());
 		System.out.println("REPOSITORY PEER 1:");
 		System.out.println(peer_1.getRepository().getFileMap().keySet());
 
-		//PEER 2: crea la repository e genera un "push conflict" avendo effettuato la push di nuovi file
-		//senza aver effettuato prima la pull
+		//STEP 3: the PEER- 2 creates a repository and generates a "push conflict" because it
+		//pushes some changes into the network before a pull.
 
 		assertTrue(peer_2.createRepository(REPO_NAME, dirs[2]));
 
@@ -120,7 +121,7 @@ public class GitProtocolImplSimulation {
 		assertEquals(ErrorMessage.PUSH_CONFLICT.print(), peer_2.push(REPO_NAME));
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_2.pull(REPO_NAME));
 
-		System.out.println("---------------------------");
+		System.out.println("---------- STEP 3 ----------");
 
 		System.out.println("REPOSITORY MASTER PEER:");
 		System.out.println(master_peer.getRepository().getFileMap().keySet());
@@ -129,7 +130,7 @@ public class GitProtocolImplSimulation {
 		System.out.println("REPOSITORY PEER 2:");
 		System.out.println(peer_2.getRepository().getFileMap().keySet());
 
-		//PEER 3: prima che il peer 2 effettui nuovamente la sua push, il peer 3 effettua una nuova push con successo
+		//STEP 4: The PEER-3 pushes something new to the network, before the push of PEER-2.
 		assertTrue(peer_3.createRepository(REPO_NAME, dirs[3]));
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_3.pull(REPO_NAME));
 
@@ -142,7 +143,7 @@ public class GitProtocolImplSimulation {
 		assertTrue(peer_3.commit(REPO_NAME, COMMIT_TEST));
 		assertEquals(ErrorMessage.PUSH_SUCCESS.print(), peer_3.push(REPO_NAME));
 
-		System.out.println("---------------------------");
+		System.out.println("---------- STEP 4 ----------");
 
 		System.out.println("REPOSITORY MASTER PEER:");
 		System.out.println(master_peer.getRepository().getFileMap().keySet());
@@ -153,8 +154,8 @@ public class GitProtocolImplSimulation {
 		System.out.println("REPOSITORY PEER 3:");
 		System.out.println(peer_3.getRepository().getFileMap().keySet());
 
-		//A questo punto il peer 2 effettua la sua push, rilevando nuovamente un conflitto, lo risolve
-		//ed effettua la push. Tutti i peer aggiornano la repository.
+		//STEP 5: At this point, the PEER-2 generates a new push conflict. A new pull resolves the confict and it
+		// can pushes its changes to the network. In the end all peers pulls the changes into their local repositories.
 
 		assertEquals(ErrorMessage.PUSH_CONFLICT.print(), peer_2.push(REPO_NAME));
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_2.pull(REPO_NAME));
@@ -165,7 +166,7 @@ public class GitProtocolImplSimulation {
 		assertEquals(ErrorMessage.PULL_NO_UPDATE.print(), peer_2.pull(REPO_NAME));
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_3.pull(REPO_NAME));
 
-		System.out.println("---------------------------");
+		System.out.println("---------- STEP 5 ----------");
 
 		System.out.println("REPOSITORY MASTER PEER:");
 		System.out.println(master_peer.getRepository().getFileMap().keySet());

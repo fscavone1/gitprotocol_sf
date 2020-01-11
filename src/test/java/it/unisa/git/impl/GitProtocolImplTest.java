@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +28,8 @@ public class GitProtocolImplTest {
 	private GitProtocolImpl peer_2;
 	private File dirs[];
 
+	private final static Logger log = Logger.getLogger(GitProtocolImplTest.class.getName());
+
 	public GitProtocolImplTest() throws Exception {
 		master_peer = new GitProtocolImpl(0, "127.0.0.1", new MessageListenerImpl(0));
 		peer_1 = new GitProtocolImpl(1, "127.0.0.1", new MessageListenerImpl(1));
@@ -40,7 +43,7 @@ public class GitProtocolImplTest {
 
 		for (int i = 0; i < dirs.length; i++) {
 			String dir_name = "peer_" + i;
-			File dir = new File(PATH, dir_name);
+			File dir = new File(PATH, dir_name + "/" + REPO_NAME);
 
 			if (dir.exists()) {
 				FileUtils.deleteDirectory(dir);
@@ -53,26 +56,29 @@ public class GitProtocolImplTest {
 
 	/**
 	 * TEST CASE 1 : createRepository
-	 * @result Repository creata con successo.
+	 * @result Creates a new repository in a directory successfully.
 	 */
 	@Test
 	public void createRepositorySuccess() {
+		log.info("createRepositorySuccess is running...");
 		assertTrue(master_peer.createRepository(REPO_NAME, dirs[0]));
 	}
 
 	/**
 	 * TEST CASE 2 : createRepository
-	 * @result Repository duplicata.
+	 * @result The creation of a new repository in a directory fails
+	 * because it's duplicated.
 	 */
 	@Test
 	public void createRepositoryFailure() {
+		log.info("createRepositoryFailure is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 		assertFalse(master_peer.createRepository(REPO_NAME, dirs[0]));
 	}
 
 	/**
 	 * TEST CASE 3 : addFilesToRepository
-	 * @result Aggiunta di file nella repository con successo.
+	 * @result Adds a list of File to the given local repository successfully.
 	 */
 	@Test
 	public void addFilesToRepositorySuccess() throws IOException {
@@ -87,13 +93,13 @@ public class GitProtocolImplTest {
 		}
 
 		assertTrue(master_peer.addFilesToRepository(REPO_NAME, files));
-		System.out.println("addFilesToRepositorySuccess = " + master_peer.getRepository().getFileMap().keySet());
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
 
 	}
 
 	/**
 	 * TEST CASE 4 : addFilesToRepository
-	 * @result Aggiunta di file in una respository sbagliata.
+	 * @result The add of a list of File fails when the given repository is wrong.
 	 */
 	@Test
 	public void addFilesToRepositoryFailure() throws IOException {
@@ -108,13 +114,13 @@ public class GitProtocolImplTest {
 		}
 
 		assertFalse(master_peer.addFilesToRepository("X", files));
-		System.out.println("addFilesToRepositoryFailure = " + master_peer.getRepository().getFileMap().keySet());
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
 
 	}
 
 	/**
 	 * TEST CASE 5 : commit
-	 * @result Eseguizione di una commit con successo*
+	 * @result Applies the changing to the files in the local repository successfully.
 	 */
 	@Test
 	public void commitSuccess() throws IOException {
@@ -130,13 +136,13 @@ public class GitProtocolImplTest {
 
 		master_peer.addFilesToRepository(REPO_NAME, files);
 		assertTrue(master_peer.commit(REPO_NAME, COMMIT_TEST));
-		System.out.println("commitSuccess = " + master_peer.getRepository().getCommits());
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
 
 	}
 
 	/**
 	 * TEST CASE 6 : commit
-	 * @result Commit eseguita su repository errata.
+	 * @result The changing to the files fails because the given repository is wrong.
 	 */
 	@Test
 	public void commitFailure() throws IOException {
@@ -152,13 +158,13 @@ public class GitProtocolImplTest {
 
 		master_peer.addFilesToRepository(REPO_NAME, files);
 		assertFalse(master_peer.commit("X", COMMIT_TEST));
-		System.out.println("commitFailure = " + master_peer.getRepository().getCommits());
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
 
 	}
 
 	/**
 	 * TEST CASE 7 : push
-	 * @result Push di file eseguita con successo
+	 * @result Pushes all commits on the network successfully.
 	 */
 	@Test
 	public void pushSuccess() throws IOException {
@@ -176,14 +182,14 @@ public class GitProtocolImplTest {
 		master_peer.commit(REPO_NAME, COMMIT_TEST);
 		assertEquals(ErrorMessage.PUSH_SUCCESS.print(), master_peer.push(REPO_NAME));
 
-		System.out.println("pushSuccess (master_peer) = " + master_peer.getRepository().getFileMap().keySet());
+		log.info("MASTER-PEER = " + master_peer.getRepository().testToString());
 
 	}
 
 	/**
 	 * TEST CASE 8 : push
-	 * @result Un peer effettua la push, un secondo peer non riesce ad effettuare la push non avendo
-	 * aggiornato la repository prima di inoltrare i suoi aggiornamenti.
+	 * @result The push of all commits fails because the repository of
+	 * the second peer isn't updated;
 	 */
 	@Test
 	public void pushConflict() throws IOException {
@@ -216,18 +222,17 @@ public class GitProtocolImplTest {
 
 		assertEquals(ErrorMessage.PUSH_CONFLICT.print(), peer_1.push(REPO_NAME));
 
-		System.out.println("pushConflict (master_peer) = " + master_peer.getRepository().getFileMap().keySet());
-		System.out.println("pushConflict (peer_1) = " + peer_1.getRepository().getFileMap().keySet());
+		log.info("MASTER-PEER = " + master_peer.getRepository().testToString());
+		log.info("PEER-1 = " + peer_1.getRepository().testToString());
 
 	}
 
 	/**
 	 * TEST CASE 9 : pull
-	 * @result Pull eseguita con successo.
+	 * @result Pulles the files from the network successfully.
 	 */
 	@Test
 	public void pullSuccess() throws IOException {
-		
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -245,24 +250,23 @@ public class GitProtocolImplTest {
 		peer_1.createRepository(REPO_NAME, dirs[1]);
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_1.pull(REPO_NAME));
 
-		System.out.println("pullSuccess (master_peer) = " + master_peer.getRepository().getFileMap().keySet());
-		System.out.println("pullSuccess (peer_1) = " + peer_1.getRepository().getFileMap().keySet());
-
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		log.info("PEER-1 = " + peer_1.getRepository().getFileMap().keySet());
 	}
 
 	/**
 	 * TEST CASE 10 : pull
-	 * @result Repository non trovata.
+	 * @result The pull fails because there isn't a local repository with the given name.
 	 */
 	@Test
 	public void pullRepositoryNotFound(){
+		log.info("pullRepositoryNotFound is running...");
 		assertEquals(ErrorMessage.REPOSITORY_NOT_FOUND.print(), master_peer.pull(REPO_NAME));
 	}
 
 	/**
 	 * TEST CASE 11 : pull
-	 * @result Due peer effettuano le push con successo per poi effettuare due pull
-	 * che non riscontrano ulteriori cambiamenti.
+	 * @result The repository has no new files to download;
 	 */
 	@Test
 	public void pullNoUpdate() throws IOException {
@@ -285,10 +289,25 @@ public class GitProtocolImplTest {
 
 		assertEquals(ErrorMessage.PULL_NO_UPDATE.print(), peer_2.pull(REPO_NAME));
 
-		System.out.println("pullNoUpdate (master_peer) = " + master_peer.getRepository().getFileMap().keySet());
-		System.out.println("pullNoUpdate (peer_2) = " + peer_2.getRepository().getFileMap().keySet());
-
+		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		log.info("PEER-2 = " + peer_2.getRepository().getFileMap().keySet());
 	}
+
+	/**
+	 * TEST CASE 12 : push
+	 * @result The push fails because there isn't a local repository with the given name.
+	 */
+	@Test
+	public void pushRepositoryNotFound(){
+		log.info("pushRepositoryNotFound is running...");
+		master_peer.createRepository(REPO_NAME, dirs[0]);
+		List<File> files = new ArrayList<>();
+		File f = new File(dirs[0], "file_1.txt");
+		files.add(f);
+		master_peer.commit(REPO_NAME, COMMIT_TEST);
+		assertEquals(ErrorMessage.REPOSITORY_NOT_FOUND.print(), master_peer.push("X"));
+	}
+
 
 	@AfterClass
 	public static void cleanUp() throws IOException {

@@ -53,7 +53,7 @@ public class Main {
                     case 1:
                         terminal.printf("Enter the repository name & the folder path!\n\n");
                         String repository_1 = txtIO.newStringInputReader().withDefaultValue("default-repository").read("Name:");
-                        dir = new File(PATH, id + "");
+                        dir = new File(PATH, id + "/" + repository_1);
                         if (peer.createRepository(repository_1, dir)) {
                             dir.mkdirs();
                             terminal.printf("\nRepository %s successfully created in the path '%s'!\n", repository_1, dir.getPath());
@@ -76,7 +76,7 @@ public class Main {
                             filesAdded = true;
                             terminal.printf("\nFiles successfully added in the '%s' repository!\n", repository_2);
                         } else
-                            terminal.printf("\nError in adding the files to the repository or already exists.");
+                            terminal.printf("\nThe given repository doesn't exists.");
                         break;
                     case 3:
                         if (filesAdded) {
@@ -87,7 +87,7 @@ public class Main {
                                 commitAdded = true;
                                 terminal.printf("\nCommit successfully added in the '%s' repository!\n", repository_3);
                             } else
-                                terminal.printf("\nError in adding the commit to the repository or already exists.");
+                                terminal.printf("\nThe given repository doesn't exists.");
                         } else {
                             terminal.printf("You need to add some files before creating a commit!\n\n");
                         }
@@ -175,6 +175,5 @@ public class Main {
                 terminal.printf("   " + s + "\n");
             }
         }
-        terminal.printf(rep.getContributors().toString());
     }
 }
