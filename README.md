@@ -18,12 +18,12 @@ The purpose of this project is to design and develop the Git protocol distribute
 
 ### Technologies
 The project has been implemented with:
-- Java 8;
-- TomP2P;
-- Apache Maven;
-- JUnit;
-- Docker;
-- IntelliJ IDEA.
+- [Java 8](https://www.java.com/en/download/faq/java8.xml);
+- [TomP2P](https://tomp2p.net/);
+- [Apache Maven](https://maven.apache.org/);
+- [JUnit](https://junit.org/junit5/);
+- [Docker](https://www.docker.com/);
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/).
 
 ## Project structure
 ```
@@ -48,15 +48,15 @@ The ```it.unisa.git.entity``` package provides two classes:
 - *Repository*: the abstract Object which represents the repository and allows to handle the commits, the saved files, and others general informations.
 
 ### Impl package
-The ```it.unisa.git.impl ``` package provides five classes:
+The ```it.unisa.git.impl``` package provides five classes:
 - *ErrorMessage*: the enumeration of all the possibile messages which can be returned from various methods;
 - *GitProtocol*: the API that defines all the operations of the project;
 - *GitProtocolImpl*: the implementation of the previous API;
 - *MessageListener*: the API that defines the message listener;
 - *MessageListenerImpl*: the implementation of a method which parses the messages.
 
-### Git pacakge
-The ```it.unisa.git ``` package provides a *Main* class which allows the interaction of a user with the system. 
+### Git package
+The ```it.unisa.git``` package provides a *Main* class which allows the interaction of a user with the system. 
 
 ## Test
 The ```test``` packages contains two java classes that implements all the unit tests. 
