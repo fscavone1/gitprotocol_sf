@@ -49,14 +49,14 @@ The ```it.unisa.git.entity``` package provides two classes:
 
 ### Impl package
 The ```it.unisa.git.impl ``` package provides five classes:
-- *ErrorMessage*: the enumeration of all the possibile messages whichh can be returned from various methods;
-- *GitProtocol*: the API that define all the operations of the project;
+- *ErrorMessage*: the enumeration of all the possibile messages which can be returned from various methods;
+- *GitProtocol*: the API that defines all the operations of the project;
 - *GitProtocolImpl*: the implementation of the previous API;
-- *MessageListener*: the API that define the message listener;
-- *MessageListenerImpl*: the implementation of a method which parse the messages.
+- *MessageListener*: the API that defines the message listener;
+- *MessageListenerImpl*: the implementation of a method which parses the messages.
 
 ### Git pacakge
-The ```it.unisa.git ``` package provide a *Main* class which allows the interaction of a user with the system. 
+The ```it.unisa.git ``` package provides a *Main* class which allows the interaction of a user with the system. 
 
 ## Test
 The ```test``` packages contains two java classes that implements all the unit tests. 
@@ -78,12 +78,10 @@ The ```test``` packages contains two java classes that implements all the unit t
 #### GitProtocolImplSimulation
 This class tests all the implemented methods which simulates the interaction with the system of four peer. 
 
-The ```MASTER-PEER``` creates a repository and push one file into the network; then the ```PEER_1``` creates a repository, pull the files into it, changes the text of the file and creates a new file and then pushes them into the network; the ```PEER_2``` creates a repository and generate a ```PUSH_CONFLICT``` because it pushes new files into the network without making a pull first, so it's forced to make a pull; in the mean time the ```PEER_3``` creates a repository and pulls some changes successfully; at this point, the ```PEER_2``` detect a new ```PUSH_CONFLICT``` and after the push, it's able to pull its changes successfully. In the end all the peers pulls the changes of the others in their local repositories.
+The ```MASTER-PEER``` creates a repository and pushes one file into the network; then the ```PEER_1``` creates a repository, pulls the files into it, changes the text of the file and creates a new file and then pushes them into the network; the ```PEER_2``` creates a repository and generates a ```PUSH_CONFLICT``` because it pushes new files into the network without making a pull first, so it's forced to make a pull; in the mean time the ```PEER_3``` creates a repository and pulls some changes successfully; at this point, the ```PEER_2``` detect a new ```PUSH_CONFLICT``` and after the pull, it's able to push its changes successfully. In the end all the peers pull the changes of the others in their local repositories.
 
 ## Build in a Docker container
-An example application is provided using Docker container, running on a local machine. See the Dockerfile, for the builing details.
-
-First of all you can build your docker container:
+First of all you can build the docker container:
 ```
 docker build --no-cache -t gitprotocol_sf .
 ```
@@ -92,7 +90,7 @@ After that you can start the master peer, in interactive mode (-i) and with two 
 ```
 docker run -i --name MASTER-PEER -e MASTERIP="127.0.0.1" -e ID=0 gitprotocol_sf
 ```
-the ```MASTERIP``` envirnoment variable is the master peer ip address and the ID environment variable is the unique id of your peer. Rember you have to run the master peer using the ```ID=0```.
+the ```MASTERIP``` envirnoment variable is the master peer ip address and the ID environment variable is the unique id of your peer. The master peer must have the ```ID=0```.
 
 #### Start a generic peer
 When master is started you have to check the ip address of your container:
