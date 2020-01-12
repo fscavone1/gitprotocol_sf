@@ -143,10 +143,12 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public String pull(String _repo_name) {
         try {
-            if (repository == null || !repository.getName().equals(_repo_name)) {
+            if (repository == null) {
                 return ErrorMessage.REPOSITORY_NOT_FOUND.print();
             }
-
+            if(!repository.getName().equals(_repo_name)){
+                return ErrorMessage.REPOSITORY_NOT_FOUND.print();
+            }
             boolean append = false;
             Repository dht_repo = getFromDHT(_repo_name);
             int commit_diff = repository.getCommits().size() - dht_repo.getCommits().size();
