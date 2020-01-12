@@ -194,6 +194,13 @@ public class GitProtocolImpl implements GitProtocol {
         _dht.peer().announceShutdown().start().awaitUninterruptibly();
     }
 
+    /**
+     * Retrieve the repository from the DHT
+     *
+     * @param _repo_name a String, the name of the repository
+     * @return an Object, represent the DHT repository
+     */
+
     private Repository getFromDHT(String _repo_name) throws IOException, ClassNotFoundException {
         FutureGet fg = _dht.get(Number160.createHash(_repo_name)).start();
         fg.awaitUninterruptibly();
@@ -206,6 +213,14 @@ public class GitProtocolImpl implements GitProtocol {
         }
         return null;
     }
+
+    /**
+     * Retrieve the repository from the DHT
+     *
+     * @param _repo_name a String, the name of the repository
+     * @param _dir an Object, the repository to add into the DHT
+     * @return true if it is correctly saved, false otherwise.
+     */
 
     private boolean saveOnDHT(String _repo_name, Repository _dir) {
         try {

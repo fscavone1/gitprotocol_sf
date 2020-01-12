@@ -1,16 +1,19 @@
-FROM ubuntu
+FROM maven:latest as mvn
+RUN apt-get update && apt-get -y install git
 WORKDIR /app
-ADD . /app/gitprotocol_sf
-
-FROM maven:3.5-jdk-8-alpine
-WORKDIR /app
-COPY --from=0 /app/gitprotocol_sf /app
+ENV URL=https://github.com/fscavone1/gitprotocol_sf.git
+ENV PROJECT=gitprotocol_sf
+RUN git clone $URL
+WORKDIR /app/$PROJECT
 RUN mvn package
+RUN mvn test -Dtest=GitProtocolImplSimulation
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
 ENV MASTERIP=127.0.0.1
 ENV ID=0
-COPY --from=1 /app/target/gitprotocol_sf-1.0-jar-with-dependencies.jar /app
+ENV PROJECT=gitprotocol_sf
+ENV JAR=gitprotocol_sf-1.0-jar-with-dependencies.jar
+COPY --from=mvn /app/$PROJECT/target/$JAR /app
 
-CMD /usr/bin/java -jar gitprotocol_sf-1.0-jar-with-dependencies.jar -m $MASTERIP -id $ID
+CMD /usr/bin/java -jar $JAR -m $MASTERIP -id $ID

@@ -238,7 +238,7 @@ public class Repository implements Serializable {
     public String testToString() {
         return "Repository{" +
                 "files=" + fileMap.keySet() +
-                ", commits=" + commits +
+                ",\n              commits=" + commits +
                 '}';
     }
 

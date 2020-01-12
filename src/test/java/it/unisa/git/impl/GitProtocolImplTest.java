@@ -60,8 +60,9 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void createRepositorySuccess() {
-		log.info("createRepositorySuccess is running...");
+		System.out.println("createRepositorySuccess is running...");
 		assertTrue(master_peer.createRepository(REPO_NAME, dirs[0]));
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -71,9 +72,10 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void createRepositoryFailure() {
-		log.info("createRepositoryFailure is running...");
+		System.out.println("createRepositoryFailure is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 		assertFalse(master_peer.createRepository(REPO_NAME, dirs[0]));
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -82,6 +84,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void addFilesToRepositorySuccess() throws IOException {
+		System.out.println("addFilesToRepositorySuccess is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -93,8 +96,8 @@ public class GitProtocolImplTest {
 		}
 
 		assertTrue(master_peer.addFilesToRepository(REPO_NAME, files));
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -103,6 +106,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void addFilesToRepositoryFailure() throws IOException {
+		System.out.println("addFilesToRepositoryFailure is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -114,8 +118,8 @@ public class GitProtocolImplTest {
 		}
 
 		assertFalse(master_peer.addFilesToRepository("X", files));
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -124,6 +128,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void commitSuccess() throws IOException {
+		System.out.println("commitSuccess is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -136,8 +141,8 @@ public class GitProtocolImplTest {
 
 		master_peer.addFilesToRepository(REPO_NAME, files);
 		assertTrue(master_peer.commit(REPO_NAME, COMMIT_TEST));
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -146,6 +151,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void commitFailure() throws IOException {
+		System.out.println("commitFailure is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -158,8 +164,8 @@ public class GitProtocolImplTest {
 
 		master_peer.addFilesToRepository(REPO_NAME, files);
 		assertFalse(master_peer.commit("X", COMMIT_TEST));
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -168,6 +174,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pushSuccess() throws IOException {
+		System.out.println("pushSuccess is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -182,8 +189,8 @@ public class GitProtocolImplTest {
 		master_peer.commit(REPO_NAME, COMMIT_TEST);
 		assertEquals(ErrorMessage.PUSH_SUCCESS.print(), master_peer.push(REPO_NAME));
 
-		log.info("MASTER-PEER = " + master_peer.getRepository().testToString());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().testToString());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -193,6 +200,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pushConflict() throws IOException {
+		System.out.println("pushConflict is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -222,9 +230,9 @@ public class GitProtocolImplTest {
 
 		assertEquals(ErrorMessage.PUSH_CONFLICT.print(), peer_1.push(REPO_NAME));
 
-		log.info("MASTER-PEER = " + master_peer.getRepository().testToString());
-		log.info("PEER-1 = " + peer_1.getRepository().testToString());
-
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().testToString());
+		System.out.println("PEER-1 = " + peer_1.getRepository().testToString());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -233,6 +241,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pullSuccess() throws IOException {
+		System.out.println("pullSuccess is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -250,8 +259,9 @@ public class GitProtocolImplTest {
 		peer_1.createRepository(REPO_NAME, dirs[1]);
 		assertEquals(ErrorMessage.PULL_SUCCESS.print(), peer_1.pull(REPO_NAME));
 
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-		log.info("PEER-1 = " + peer_1.getRepository().getFileMap().keySet());
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("PEER-1 = " + peer_1.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -260,8 +270,9 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pullRepositoryNotFound(){
-		log.info("pullRepositoryNotFound is running...");
+		System.out.println("pullRepositoryNotFound is running...");
 		assertEquals(ErrorMessage.REPOSITORY_NOT_FOUND.print(), master_peer.pull(REPO_NAME));
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -270,6 +281,7 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pullNoUpdate() throws IOException {
+		System.out.println("pullNoUpdate is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 
 		List<File> files = new ArrayList<>();
@@ -289,8 +301,9 @@ public class GitProtocolImplTest {
 
 		assertEquals(ErrorMessage.PULL_NO_UPDATE.print(), peer_2.pull(REPO_NAME));
 
-		log.info("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
-		log.info("PEER-2 = " + peer_2.getRepository().getFileMap().keySet());
+		System.out.println("MASTER-PEER = " + master_peer.getRepository().getFileMap().keySet());
+		System.out.println("PEER-2 = " + peer_2.getRepository().getFileMap().keySet());
+		System.out.println("---------- END ----------");
 	}
 
 	/**
@@ -299,13 +312,14 @@ public class GitProtocolImplTest {
 	 */
 	@Test
 	public void pushRepositoryNotFound(){
-		log.info("pushRepositoryNotFound is running...");
+		System.out.println("pushRepositoryNotFound is running...");
 		master_peer.createRepository(REPO_NAME, dirs[0]);
 		List<File> files = new ArrayList<>();
 		File f = new File(dirs[0], "file_1.txt");
 		files.add(f);
 		master_peer.commit(REPO_NAME, COMMIT_TEST);
 		assertEquals(ErrorMessage.REPOSITORY_NOT_FOUND.print(), master_peer.push("X"));
+		System.out.println("---------- END ----------");
 	}
 
 
