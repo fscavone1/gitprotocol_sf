@@ -32,8 +32,8 @@ public class Main {
     private static File dir;
 
     public static void main(String[] args) {
-        boolean filesAdded = true;
-        boolean commitAdded = true;
+        boolean filesAdded = false;
+        boolean commitAdded = false;
 
         Main exe = new Main();
         final CmdLineParser parser = new CmdLineParser(exe);
