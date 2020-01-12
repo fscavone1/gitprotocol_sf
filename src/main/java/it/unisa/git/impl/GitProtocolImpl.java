@@ -115,7 +115,10 @@ public class GitProtocolImpl implements GitProtocol {
      */
     public String push(String _repo_name) {
         try {
-            if (repository == null || !repository.getName().equals(_repo_name)) {
+            if (repository == null) {
+                return ErrorMessage.REPOSITORY_NOT_FOUND.print();
+            }
+            if(!repository.getName().equals(_repo_name)){
                 return ErrorMessage.REPOSITORY_NOT_FOUND.print();
             }
             else {
